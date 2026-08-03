@@ -1,23 +1,34 @@
 function getConfig() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const secretKey =
+    process.env.SUPABASE_SECRET_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!url || !serviceRoleKey) {
+  if (!url || !secretKey) {
     throw new Error("Brakuje konfiguracji Supabase w zmiennych środowiskowych.");
   }
 
   return {
     baseUrl: `${url.replace(/\/$/, "")}/rest/v1`,
-    serviceRoleKey
+    secretKey
   };
 }
 
-export async function supabaseAdminFetch(path: string, init: RequestInit = {}) {
-  const { baseUrl, serviceRoleKey } = getConfig();
+export async function supabaseAdminFetch(
+  path: string,
+  init: RequestInit = {}
+) {
+  const { baseUrl, secretKey } = getConfig();
   const headers = new Headers(init.headers);
-  headers.set("apikey", serviceRoleKey);
-  headers.set("Authorization", `Bearer ${serviceRoleKey}`);
+
+  headers.set("apikey", secretKey);
   headers.set("Content-Type", "application/json");
+
+  // Starszy service_role jest tokenem JWT.
+  // Nowe klucze sb_secret_ nie są tokenami JWT i trafiają tylko do apikey.
+  if (!secretKey.startsWith("sb_secret_")) {
+    headers.set("Authorization", `Bearer ${secretKey}`);
+  }
 
   return fetch(`${baseUrl}${path}`, {
     ...init,
@@ -28,7 +39,10 @@ export async function supabaseAdminFetch(path: string, init: RequestInit = {}) {
 
 export function parseExactCount(response: Response) {
   const contentRange = response.headers.get("content-range");
+
   if (!contentRange) return 0;
+
   const total = contentRange.split("/")[1];
+
   return total && total !== "*" ? Number(total) || 0 : 0;
 }
