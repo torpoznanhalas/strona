@@ -1,7 +1,16 @@
 import type { Metadata } from "next";
+import { Barlow } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+
+const barlow = Barlow({
+  subsets: ["latin", "latin-ext"],
+  weight: ["700", "800", "900"],
+  style: "normal",
+  display: "swap",
+  variable: "--font-barlow"
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://torpoznanhalas.pl"),
@@ -20,30 +29,40 @@ export const metadata: Metadata = {
     "Automobilklub Wielkopolski",
     "normy hałasu"
   ],
-  authors: [{ name: "Stowarzyszenie Mieszkańców Ławica-Bajkowe" }],
+  authors: [
+    {
+      name: "Stowarzyszenie Mieszkańców Ławica-Bajkowe"
+    }
+  ],
   creator: "Stowarzyszenie Mieszkańców Ławica-Bajkowe",
   openGraph: {
     type: "website",
     locale: "pl_PL",
     url: "https://torpoznanhalas.pl",
     siteName: "Tor Poznań: Hałas",
-    title: "Tor Poznań przekraczał normy. Potem ruszyła walka o zmianę zasad.",
+    title:
+      "Tor Poznań przekraczał normy. Potem ruszyła walka o zmianę zasad.",
     description:
       "Zobacz dokumenty, posłuchaj nagrań i poprzyj egzekwowanie norm hałasu przy Torze Poznań."
   },
   twitter: {
     card: "summary_large_image",
     title: "Tor Poznań: hałas, fakty i dokumenty",
-    description: "Nie prosimy, byś wierzył nam na słowo. Pokazujemy dokumenty."
+    description:
+      "Nie prosimy, byś wierzył nam na słowo. Pokazujemy dokumenty."
   },
   alternates: {
     canonical: "/"
   }
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="pl">
+    <html lang="pl" className={barlow.variable}>
       <body>
         <Header />
         <main>{children}</main>
