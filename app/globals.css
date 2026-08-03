@@ -848,3 +848,81 @@ iframe {
     grid-template-columns: 1fr;
   }
 }
+
+/* Typografia Barlow — czytelniejszy rytm i luźniejsze nagłówki */
+
+body {
+  font-family: var(--font-barlow), Arial, Helvetica, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.006em;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.brand,
+.section-title,
+.fact-number,
+.timeline-date,
+.quote-card blockquote,
+.statement p,
+.demand-index,
+.support-big-number,
+.footer-title {
+  font-weight: 800;
+}
+
+.hero h1 {
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 0.93;
+}
+
+.section-title {
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 0.98;
+}
+
+.timeline-item h3 {
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1.08;
+}
+
+.quote-card blockquote {
+  font-weight: 800;
+  letter-spacing: -0.018em;
+  line-height: 1.07;
+}
+
+.statement p {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
+}
+
+.fact-number,
+.support-big-number {
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.video-copy h3,
+.demand-card h3,
+.source-card h3 {
+  font-weight: 800;
+  letter-spacing: -0.012em;
+}
+
+p,
+li,
+label,
+input,
+textarea,
+button {
+  letter-spacing: 0;
+}
