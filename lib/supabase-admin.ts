@@ -1,15 +1,47 @@
-function getConfig() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const secretKey =
-    process.env.SUPABASE_SECRET_KEY ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY;
+function cleanEnvironmentValue(value: string | undefined) {
+  return value
+    ?.trim()
+    .replace(/^["']/, "")
+    .replace(/["']$/, "");
+}
 
-  if (!url || !secretKey) {
-    throw new Error("Brakuje konfiguracji Supabase w zmiennych środowiskowych.");
+function getConfig() {
+  const rawUrl = cleanEnvironmentValue(
+    process.env.NEXT_PUBLIC_SUPABASE_URL
+  );
+
+  const secretKey = cleanEnvironmentValue(
+    process.env.SUPABASE_SECRET_KEY ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  if (!rawUrl || !secretKey) {
+    throw new Error(
+      "Brakuje adresu lub tajnego klucza Supabase w konfiguracji Netlify."
+    );
+  }
+
+  let projectUrl: URL;
+
+  try {
+    projectUrl = new URL(rawUrl);
+  } catch {
+    throw new Error(
+      "Adres Supabase jest nieprawidłowy. Powinien mieć postać https://nazwa-projektu.supabase.co"
+    );
+  }
+
+  if (
+    projectUrl.protocol !== "https:" ||
+    !projectUrl.hostname.endsWith(".supabase.co")
+  ) {
+    throw new Error(
+      "Adres Supabase powinien mieć postać https://nazwa-projektu.supabase.co"
+    );
   }
 
   return {
-    baseUrl: `${url.replace(/\/$/, "")}/rest/v1`,
+    baseUrl: `${projectUrl.origin}/rest/v1`,
     secretKey
   };
 }
@@ -23,18 +55,31 @@ export async function supabaseAdminFetch(
 
   headers.set("apikey", secretKey);
   headers.set("Content-Type", "application/json");
+  headers.set("Accept", "application/json");
 
   // Starszy service_role jest tokenem JWT.
-  // Nowe klucze sb_secret_ nie są tokenami JWT i trafiają tylko do apikey.
+  // Nowy klucz sb_secret_ trafia wyłącznie do nagłówka apikey.
   if (!secretKey.startsWith("sb_secret_")) {
     headers.set("Authorization", `Bearer ${secretKey}`);
   }
 
-  return fetch(`${baseUrl}${path}`, {
-    ...init,
-    headers,
-    cache: "no-store"
-  });
+  try {
+    return await fetch(`${baseUrl}${path}`, {
+      ...init,
+      headers,
+      cache: "no-store"
+    });
+  } catch (error) {
+    console.error("Supabase request failed", {
+      baseUrl,
+      path,
+      cause: error instanceof Error ? error.message : String(error)
+    });
+
+    throw new Error(
+      "Nie udało się połączyć z bazą danych. Sprawdź konfigurację Supabase w Netlify."
+    );
+  }
 }
 
 export function parseExactCount(response: Response) {
